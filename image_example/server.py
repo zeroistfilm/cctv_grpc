@@ -51,7 +51,7 @@ class ImageServer(image_procedure_pb2_grpc.ImageServerServicer):
 
         print('img', type(img1), sys.getsizeof(img1))
         print('encode', type(resized[1]), sys.getsizeof(resized[1]))
-        print('encode -> base64',type(img_base64_string1),  sys.getsizeof(img_base64_string1))
+        print('encode -> base64',type(img_base64_string1), sys.getsizeof(img_base64_string1))
         print('encode -> byte', type(encoded), sys.getsizeof(encoded))
         print('byte -> zlib', type(compImgSting1), sys.getsizeof(compImgSting1))
         print('base64 -> zlib',type(compImgSting2), sys.getsizeof(compImgSting2))
@@ -59,11 +59,8 @@ class ImageServer(image_procedure_pb2_grpc.ImageServerServicer):
 
         response = image_procedure_pb2.ImageResponse()
         response.imageString = encoded
+        cap.relese()
         return response
-
-
-
-
 
 
 # create a gRPC server
@@ -76,9 +73,4 @@ image_procedure_pb2_grpc.add_ImageServerServicer_to_server(ImageServer(), server
 print('Starting server. Listening on port 5001.')
 server.add_insecure_port('0.0.0.0:5001')
 server.start()
-
-try:
-    while True:
-        time.sleep(5)
-except KeyboardInterrupt:
-    server.stop(0)
+server.wait_for_termination()
