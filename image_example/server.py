@@ -14,41 +14,30 @@ import sys
 import queue
 import threading
 
-class VideoCapture:
-    def __init__(self, name):
-        self.name = name
-        self.cap = cv2.VideoCapture(self.name)
-        self.q = queue.Queue()
-        t = threading.Thread(target=self._reader)
-        t.daemon = True
-        t.start()
+capDict={}
+with open("cctv_config.json", 'r', encoding='UTF-8') as f:
+    caminfo = json.load(f)
 
-    def _reader(self):
-        while True:
-            ret, frame = self.cap.read()
-            if not ret:
-                print(self.name, ret)
-                self.cap = cv2.VideoCapture(self.name)
-                continue
-            if not self.q.empty():
-                try:
-                    self.q.get_nowait()
-                except Exception as e:
-                    print(e)
-
-            self.q.put(frame)
-
-    def read(self):
-        try:
-            return self.q.get()
-        except Exception as e:
-            print(e)
+for farm in caminfo.keys():
+    capDict[farm] = {}
+    for sector in caminfo[farm].keys():
+        capDict[farm][sector] = {}
+        for cam in caminfo[farm][sector].keys():
+            capDict[farm][sector][cam] = {}
+            for position in caminfo[farm][sector][cam].keys():
+                capDict[farm][sector][cam][position] = {}
+                if caminfo[farm][sector][cam][position].split('://')[0] == "rtsp":
+                    # print(caminfo[farm][sector][cam][position])
+                    try:
+                        capDict[farm][sector][cam][position] = caminfo[farm][sector][cam][position]
+                    except Exception as e:
+                        capDict[farm][sector][cam][position] = "Error check RTSP address"
 
 # based on .proto service
 class ImageServer(image_procedure_pb2_grpc.ImageServerServicer):
     def getImage(self, request, context):
         print(request.farm, request.sector, request.camIdx)
-        cap = cv2.VideoCapture('rtsp://admin:emfvnf1!@192.168.2.20:554/trackID=2')
+        cap = cv2.VideoCapture(capDict[request.farm][request.sector]['cctv'][request.camIdx])
         ret, img1 = cap.read()
 
         resized = cv2.imencode('.jpg', img1)
@@ -70,6 +59,10 @@ class ImageServer(image_procedure_pb2_grpc.ImageServerServicer):
         response = image_procedure_pb2.ImageResponse()
         response.imageString = encoded
         return response
+
+
+
+
 
 
 # create a gRPC server
