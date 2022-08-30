@@ -10,7 +10,7 @@ import time
 
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse, Response
 from typing import Optional, Any
 
 app = FastAPI()
@@ -21,6 +21,6 @@ stub = image_procedure_pb2_grpc.ImageServerStub(channel)
 
 @app.get('/api/getframe')
 async def getframe():
-    image_req = image_procedure_pb2.ImageRequest(farm='deulpul', sector='1', camIdx='1-2')
+    image_req = image_procedure_pb2.ImageRequest(farm='deulpul', sector='1', camIdx='1-1')
     response = stub.getImage(image_req)
-    print(response)
+    return Response(str(response))
