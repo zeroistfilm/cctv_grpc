@@ -48,8 +48,8 @@ class VideoCapture:
 class ImageServer(image_procedure_pb2_grpc.ImageServerServicer):
     def getImage(self, request, context):
         print(request.farm, request.sector, request.camIdx)
-        cap = VideoCapture('rtsp://admin:emfvnf1!@192.168.2.20:554/trackID=2')
-        img1 = cap.read()
+        cap = cv2.VideoCapture('rtsp://admin:emfvnf1!@192.168.2.20:554/trackID=2')
+        ret, img1 = cap.read()
 
         resized = cv2.imencode('.jpg', img1)
         print(type(resized))
@@ -73,7 +73,7 @@ class ImageServer(image_procedure_pb2_grpc.ImageServerServicer):
 
 
 # create a gRPC server
-server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
+server = grpc.server(futures.ThreadPoolExecutor(max_workers=20))
 
 # add the defined class to the server
 image_procedure_pb2_grpc.add_ImageServerServicer_to_server(ImageServer(), server)

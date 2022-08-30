@@ -12,7 +12,7 @@ import zlib
 import time
 
 # open a gRPC channel
-channel = grpc.insecure_channel('0.0.0.0:5001')
+channel = grpc.insecure_channel('192.168.2.1:5001')
 
 # create a stub (client)
 stub = image_procedure_pb2_grpc.ImageServerStub(channel)
