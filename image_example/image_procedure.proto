@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+// input image, width, height
+message ImageRequest {
+    string farm =1;
+    string sector = 2;
+    string camIdx = 3;
+}
+
+// output prediction
+
+message ImageResponse {
+    bytes imageString = 4;
+}
+
+// service
+service ImageServer {
+    rpc getImage(ImageRequest) returns (ImageResponse) {}
+}
