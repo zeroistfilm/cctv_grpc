@@ -13,6 +13,7 @@ import cv2
 import sys
 import queue
 import threading
+import json
 
 capDict={}
 with open("cctv_config.json", 'r', encoding='UTF-8') as f:
