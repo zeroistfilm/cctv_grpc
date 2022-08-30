@@ -58,7 +58,7 @@ class ImageServer(image_procedure_pb2_grpc.ImageServerServicer):
 
 
         response = image_procedure_pb2.ImageResponse()
-        response.imageString = encoded
+        response.imageString = compImgSting1
         cap.release()
         return response
 
