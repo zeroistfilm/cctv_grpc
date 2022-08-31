@@ -56,9 +56,12 @@ class ImageServer(image_procedure_pb2_grpc.ImageServerServicer):
         ret2, img2 = cap.read()
         cap.release()
         response = image_procedure_pb2.ImageResponse
+        print(type(imgToByteWithZlib(img1)))
         response.imgByte1 = imgToByteWithZlib(img1)
         response.imgByte2 = imgToByteWithZlib(img2)
+
         return response
+
 
 
 # create a gRPC server
