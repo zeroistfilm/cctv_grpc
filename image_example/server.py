@@ -50,8 +50,8 @@ def ByteWithZlibToImg(byteZlib):
 
 class ImageServer(image_procedure_pb2_grpc.ImageServerServicer):
     def getImage(self, request, context):
-        print(request.farm, request.sector, request.camIdx)
-        cap = cv2.VideoCapture(capDict[request.farm][request.sector]['cctv'][request.camIdx])
+        print(request.farm, request.sector, request.hasTIC,  request.camIdx)
+        cap = cv2.VideoCapture(capDict[request.farm][request.sector][request.hasTIC][request.camIdx])
         ret1, img1 = cap.read()
         ret2, img2 = cap.read()
         cap.release()

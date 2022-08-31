@@ -4,14 +4,15 @@ syntax = "proto3";
 message ImageRequest {
     string farm =1;
     string sector = 2;
-    string camIdx = 3;
+    string hasTIC=3;
+    string camIdx = 4;
 }
 
 // output prediction
 
 message ImageResponse {
-    bytes imgByte1 = 4;
-    bytes imgByte2 = 5;
+    bytes imgByte1 = 5;
+    bytes imgByte2 = 6;
 }
 
 // service

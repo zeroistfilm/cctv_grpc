@@ -71,14 +71,16 @@ async def getframe(farm: str, sector:str,isTIC:str,  camidx:str):
         return JSONResponse({"img1": img_base64_string1, "img2": img_base64_string2})
 
     elif farm == 'deulpul':
-        #url = f'http://192.168.2.1:8000/cctv/{farm}/{sector}/{isTIC}/{camidx}'
 
-        image_req = image_procedure_pb2.ImageRequest(farm='deulpul', sector='1', camIdx='1-1')
+        image_req = image_procedure_pb2.ImageRequest(farm=farm, sector=sector, hasTIC=isTIC,camIdx=camidx)
         response = stub.getImage(image_req)
-
 
         img1 = ByteWithZlibToImg(response.imgByte1)
         img2 = ByteWithZlibToImg(response.imgByte2)
+
+        if img1.shape[1] != 1920 and isTIC == 'cctv':
+            img1 = cv2.resize(img1, dsize=(1920, 1080), interpolation=cv2.INTER_CUBIC)
+            img2 = cv2.resize(img2, dsize=(1920, 1080), interpolation=cv2.INTER_CUBIC)
 
         resized = cv2.imencode('.jpg', img1)
         img_base64_string1 = base64.b64encode(resized[1]).decode()
@@ -87,28 +89,4 @@ async def getframe(farm: str, sector:str,isTIC:str,  camidx:str):
         img_base64_string2 = base64.b64encode(resized[1]).decode()
 
         return JSONResponse({"img1": img_base64_string1, "img2": img_base64_string2})
-        #return Response(decompimg1+decompimg2)
-
-        # async with aiohttp.ClientSession(trust_env=True) as session:
-        #     async with session.get(url) as resp:
-        #         respCompImg = await resp.read()
-        #         decompimg = zlib.decompress(respCompImg).decode("utf-8")
-        #         decompimg = json.loads(decompimg)
-        #
-        #         img1 = getImageFromString(decompimg['img1'])
-        #         img2 = getImageFromString(decompimg['img2'])
-        #
-        #         if img1.shape[1] != 1920 and isTIC == 'cctv':
-        #             img1 = cv2.resize(img1, dsize=(1920, 1080), interpolation=cv2.INTER_CUBIC)
-        #             img2 = cv2.resize(img2, dsize=(1920, 1080), interpolation=cv2.INTER_CUBIC)
-        #
-        #         resized = cv2.imencode('.jpg', img1)
-        #         img_base64_string1 = base64.b64encode(resized[1]).decode()
-        #
-        #         resized = cv2.imencode('.jpg', img2)
-        #         img_base64_string2 = base64.b64encode(resized[1]).decode()
-        #
-        #         return JSONResponse({"img1": img_base64_string1, "img2": img_base64_string2})
-
-
 
