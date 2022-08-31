@@ -7,19 +7,38 @@ import numpy as np
 import base64
 import zlib
 import time
-
+import cv2
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from starlette.responses import JSONResponse, Response
 from typing import Optional, Any
+import json
 
 app = FastAPI()
 channel = grpc.insecure_channel('192.168.2.1:5001')
 stub = image_procedure_pb2_grpc.ImageServerStub(channel)
+capDict={}
+with open("cctv_config.json", 'r', encoding='UTF-8') as f:
+    caminfo = json.load(f)
+
+for farm in caminfo.keys():
+    capDict[farm] = {}
+    for sector in caminfo[farm].keys():
+        capDict[farm][sector] = {}
+        for cam in caminfo[farm][sector].keys():
+            capDict[farm][sector][cam] = {}
+            for position in caminfo[farm][sector][cam].keys():
+                capDict[farm][sector][cam][position] = {}
+                if caminfo[farm][sector][cam][position].split('://')[0] == "rtsp":
+                    # print(caminfo[farm][sector][cam][position])
+                    try:
+                        capDict[farm][sector][cam][position] = caminfo[farm][sector][cam][position]
+                    except Exception as e:
+                        capDict[farm][sector][cam][position] = "Error check RTSP address"
 
 
 @app.get("/cctv/{farm}/{sector}/{isTIC}/{camidx}")
-async def getframe():
+async def getframe(farm: str, sector:str,isTIC:str,  camidx:str):
 
     if farm=='dongilps':
         cap = cv2.VideoCapture(capDict[farm][sector][isTIC][camidx])
@@ -41,33 +60,33 @@ async def getframe():
         return JSONResponse({"img1": img_base64_string1, "img2": img_base64_string2})
 
     elif farm == 'deulpul':
-        url = f'http://192.168.2.1:8000/cctv/{farm}/{sector}/{isTIC}/{camidx}'
+        #url = f'http://192.168.2.1:8000/cctv/{farm}/{sector}/{isTIC}/{camidx}'
 
         image_req = image_procedure_pb2.ImageRequest(farm='deulpul', sector='1', camIdx='1-1')
         response = stub.getImage(image_req)
-        print(type(response.imageString))
-        return Response(response.imageString)
+        decompimg = zlib.decompress(response.imageString).decode()
+        return Response(decompimg)
 
-        async with aiohttp.ClientSession(trust_env=True) as session:
-            async with session.get(url) as resp:
-                respCompImg = await resp.read()
-                decompimg = zlib.decompress(respCompImg).decode("utf-8")
-                decompimg = json.loads(decompimg)
-
-                img1 = getImageFromString(decompimg['img1'])
-                img2 = getImageFromString(decompimg['img2'])
-
-                if img1.shape[1] != 1920 and isTIC == 'cctv':
-                    img1 = cv2.resize(img1, dsize=(1920, 1080), interpolation=cv2.INTER_CUBIC)
-                    img2 = cv2.resize(img2, dsize=(1920, 1080), interpolation=cv2.INTER_CUBIC)
-
-                resized = cv2.imencode('.jpg', img1)
-                img_base64_string1 = base64.b64encode(resized[1]).decode()
-
-                resized = cv2.imencode('.jpg', img2)
-                img_base64_string2 = base64.b64encode(resized[1]).decode()
-
-                return JSONResponse({"img1": img_base64_string1, "img2": img_base64_string2})
+        # async with aiohttp.ClientSession(trust_env=True) as session:
+        #     async with session.get(url) as resp:
+        #         respCompImg = await resp.read()
+        #         decompimg = zlib.decompress(respCompImg).decode("utf-8")
+        #         decompimg = json.loads(decompimg)
+        #
+        #         img1 = getImageFromString(decompimg['img1'])
+        #         img2 = getImageFromString(decompimg['img2'])
+        #
+        #         if img1.shape[1] != 1920 and isTIC == 'cctv':
+        #             img1 = cv2.resize(img1, dsize=(1920, 1080), interpolation=cv2.INTER_CUBIC)
+        #             img2 = cv2.resize(img2, dsize=(1920, 1080), interpolation=cv2.INTER_CUBIC)
+        #
+        #         resized = cv2.imencode('.jpg', img1)
+        #         img_base64_string1 = base64.b64encode(resized[1]).decode()
+        #
+        #         resized = cv2.imencode('.jpg', img2)
+        #         img_base64_string2 = base64.b64encode(resized[1]).decode()
+        #
+        #         return JSONResponse({"img1": img_base64_string1, "img2": img_base64_string2})
 
 
 

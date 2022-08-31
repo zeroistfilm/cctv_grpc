@@ -41,24 +41,23 @@ class ImageServer(image_procedure_pb2_grpc.ImageServerServicer):
         cap = cv2.VideoCapture(capDict[request.farm][request.sector]['cctv'][request.camIdx])
         ret, img1 = cap.read()
 
-        resized = cv2.imencode('.jpg', img1)
-        print(type(resized))
-        encoded = resized[1].tobytes()
-        img_base64_string1 = base64.b64encode(resized[1]).decode('utf-8')
+        imgEncoded = cv2.imencode('.jpg', img1)
+        imgBytes = imgEncoded[1].tobytes()
+        imgBase64 = base64.b64encode(imgEncoded[1]).decode('utf-8')
 
-        compImgSting1 = zlib.compress(encoded, -1)
-        compImgSting2 = zlib.compress(bytearray(img_base64_string1, encoding='utf-8'), -1)
+        compImgByte = zlib.compress(imgBytes)
+        compImgBase64 = zlib.compress(bytearray(imgBase64, encoding='utf-8'), -1)
 
         print('img', type(img1), sys.getsizeof(img1))
-        print('encode', type(resized[1]), sys.getsizeof(resized[1]))
-        print('encode -> base64',type(img_base64_string1), sys.getsizeof(img_base64_string1))
-        print('encode -> byte', type(encoded), sys.getsizeof(encoded))
-        print('byte -> zlib', type(compImgSting1), sys.getsizeof(compImgSting1))
-        print('base64 -> zlib',type(compImgSting2), sys.getsizeof(compImgSting2))
+        print('encode', type(imgEncoded[1]), sys.getsizeof(imgEncoded[1]))
+        print('encode -> byte', type(imgBytes), sys.getsizeof(imgBytes))
+        print('encode -> base64',type(imgBase64), sys.getsizeof(imgBase64))
+        print('byte -> zlib', type(compImgByte), sys.getsizeof(compImgByte))
+        print('base64 -> zlib',type(compImgBase64), sys.getsizeof(compImgBase64))
 
 
         response = image_procedure_pb2.ImageResponse()
-        response.imageString = compImgSting1
+        response.imageString = compImgByte
         cap.release()
         return response
 
