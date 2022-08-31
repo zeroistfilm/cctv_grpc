@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x15image_procedure.proto\"<\n\x0cImageRequest\x12\x0c\n\x04\x66\x61rm\x18\x01 \x01(\t\x12\x0e\n\x06sector\x18\x02 \x01(\t\x12\x0e\n\x06\x63\x61mIdx\x18\x03 \x01(\t\"$\n\rImageResponse\x12\x13\n\x0bimageString\x18\x04 \x01(\x0c\x32:\n\x0bImageServer\x12+\n\x08getImage\x12\r.ImageRequest\x1a\x0e.ImageResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x15image_procedure.proto\"<\n\x0cImageRequest\x12\x0c\n\x04\x66\x61rm\x18\x01 \x01(\t\x12\x0e\n\x06sector\x18\x02 \x01(\t\x12\x0e\n\x06\x63\x61mIdx\x18\x03 \x01(\t\"3\n\rImageResponse\x12\x10\n\x08imgByte1\x18\x04 \x01(\x0c\x12\x10\n\x08imgByte2\x18\x05 \x01(\x0c\x32:\n\x0bImageServer\x12+\n\x08getImage\x12\r.ImageRequest\x1a\x0e.ImageResponse\"\x00\x62\x06proto3'
 )
 
 
@@ -80,8 +80,15 @@ _IMAGERESPONSE = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='imageString', full_name='ImageResponse.imageString', index=0,
+      name='imgByte1', full_name='ImageResponse.imgByte1', index=0,
       number=4, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='imgByte2', full_name='ImageResponse.imgByte2', index=1,
+      number=5, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -99,7 +106,7 @@ _IMAGERESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=87,
-  serialized_end=123,
+  serialized_end=138,
 )
 
 DESCRIPTOR.message_types_by_name['ImageRequest'] = _IMAGEREQUEST
@@ -129,8 +136,8 @@ _IMAGESERVER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=125,
-  serialized_end=183,
+  serialized_start=140,
+  serialized_end=198,
   methods=[
   _descriptor.MethodDescriptor(
     name='getImage',

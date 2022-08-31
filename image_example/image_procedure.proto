@@ -10,7 +10,8 @@ message ImageRequest {
 // output prediction
 
 message ImageResponse {
-    bytes imageString = 4;
+    bytes imgByte1 = 4;
+    bytes imgByte2 = 5;
 }
 
 // service

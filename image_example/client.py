@@ -64,7 +64,10 @@ async def getframe(farm: str, sector:str,isTIC:str,  camidx:str):
 
         image_req = image_procedure_pb2.ImageRequest(farm='deulpul', sector='1', camIdx='1-1')
         response = stub.getImage(image_req)
-        decompimg = zlib.decompress(response.imageString).decode()
+
+        decompimg1 = zlib.decompress(response.imgByte1)
+        decompimg2 = zlib.decompress(response.imgByte1)
+
         return Response(decompimg)
 
         # async with aiohttp.ClientSession(trust_env=True) as session:

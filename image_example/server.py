@@ -39,25 +39,18 @@ class ImageServer(image_procedure_pb2_grpc.ImageServerServicer):
     def getImage(self, request, context):
         print(request.farm, request.sector, request.camIdx)
         cap = cv2.VideoCapture(capDict[request.farm][request.sector]['cctv'][request.camIdx])
-        ret, img1 = cap.read()
-
-        imgEncoded = cv2.imencode('.jpg', img1)
-        imgBytes = imgEncoded[1].tobytes()
-        imgBase64 = base64.b64encode(imgEncoded[1]).decode('utf-8')
-
-        compImgByte = zlib.compress(imgBytes)
-        compImgBase64 = zlib.compress(bytearray(imgBase64, encoding='utf-8'), -1)
-
-        print('img', type(img1), sys.getsizeof(img1))
-        print('encode', type(imgEncoded[1]), sys.getsizeof(imgEncoded[1]))
-        print('encode -> byte', type(imgBytes), sys.getsizeof(imgBytes))
-        print('encode -> base64',type(imgBase64), sys.getsizeof(imgBase64))
-        print('byte -> zlib', type(compImgByte), sys.getsizeof(compImgByte))
-        print('base64 -> zlib',type(compImgBase64), sys.getsizeof(compImgBase64))
-
+        ret1, img1 = cap.read()
+        ret2, img2 = cap.read()
+        imgEncoded1 = cv2.imencode('.jpg', img1)
+        imgEncoded2 = cv2.imencode('.jpg', img2)
+        imgBytes1 = imgEncoded1[1].tobytes()
+        imgBytes2 = imgEncoded2[1].tobytes()
+        compImgByte1 = zlib.compress(imgBytes1)
+        compImgByte2 = zlib.compress(imgBytes2)
 
         response = image_procedure_pb2.ImageResponse()
-        response.imageString = compImgByte
+        response.imgByte1 = compImgByte1
+        response.imgByte2 = compImgByte2
         cap.release()
         return response
 
@@ -73,3 +66,5 @@ print('Starting server. Listening on port 5001.')
 server.add_insecure_port('0.0.0.0:5001')
 server.start()
 server.wait_for_termination()
+
+
