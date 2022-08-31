@@ -55,12 +55,7 @@ class ImageServer(image_procedure_pb2_grpc.ImageServerServicer):
         ret1, img1 = cap.read()
         ret2, img2 = cap.read()
         cap.release()
-        response = image_procedure_pb2.ImageResponse
-        print(type(imgToByteWithZlib(img1)))
-        response.imgByte1 = imgToByteWithZlib(img1)
-        response.imgByte2 = imgToByteWithZlib(img2)
-
-        return response
+        return image_procedure_pb2.ImageResponse(imgByte1=imgToByteWithZlib(img1), imgByte2=imgToByteWithZlib(img2),)
 
 
 
