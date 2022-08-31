@@ -36,6 +36,17 @@ for farm in caminfo.keys():
                     except Exception as e:
                         capDict[farm][sector][cam][position] = "Error check RTSP address"
 
+def imgToByteWithZlib(img):
+    imgEncoded = cv2.imencode('.jpg', img)[1]
+    imgBytes = imgEncoded.tobytes()
+    compImgByte = zlib.compress(imgBytes)
+    return compImgByte
+
+def ByteWithZlibToImg(byteZlib):
+    decompimg = zlib.decompress(byteZlib)
+    decompjpg = np.frombuffer(decompimg, dtype=np.uint8)
+    img = cv2.imdecode(decompjpg, cv2.IMREAD_COLOR)
+    return img
 
 @app.get("/cctv/{farm}/{sector}/{isTIC}/{camidx}")
 async def getframe(farm: str, sector:str,isTIC:str,  camidx:str):
@@ -65,10 +76,18 @@ async def getframe(farm: str, sector:str,isTIC:str,  camidx:str):
         image_req = image_procedure_pb2.ImageRequest(farm='deulpul', sector='1', camIdx='1-1')
         response = stub.getImage(image_req)
 
-        decompimg1 = zlib.decompress(response.imgByte1)
-        decompimg2 = zlib.decompress(response.imgByte1)
 
-        return Response(decompimg)
+        img1 = ByteWithZlibToImg(response.imgByte1)
+        img2 = ByteWithZlibToImg(response.imgByte2)
+
+        resized = cv2.imencode('.jpg', img1)
+        img_base64_string1 = base64.b64encode(resized[1]).decode()
+
+        resized = cv2.imencode('.jpg', img2)
+        img_base64_string2 = base64.b64encode(resized[1]).decode()
+
+        return JSONResponse({"img1": img_base64_string1, "img2": img_base64_string2})
+        #return Response(decompimg1+decompimg2)
 
         # async with aiohttp.ClientSession(trust_env=True) as session:
         #     async with session.get(url) as resp:

@@ -34,24 +34,31 @@ for farm in caminfo.keys():
                     except Exception as e:
                         capDict[farm][sector][cam][position] = "Error check RTSP address"
 
-# based on .proto service
+
+def imgToByteWithZlib(img):
+    imgEncoded = cv2.imencode('.jpg', img)[1]
+    imgBytes = imgEncoded.tobytes()
+    compImgByte = zlib.compress(imgBytes)
+    return compImgByte
+
+def ByteWithZlibToImg(byteZlib):
+    decompimg = zlib.decompress(byteZlib)
+    decompjpg = np.frombuffer(decompimg, dtype=np.uint8)
+    img = cv2.imdecode(decompjpg, cv2.IMREAD_COLOR)
+    return img
+
+
 class ImageServer(image_procedure_pb2_grpc.ImageServerServicer):
     def getImage(self, request, context):
         print(request.farm, request.sector, request.camIdx)
         cap = cv2.VideoCapture(capDict[request.farm][request.sector]['cctv'][request.camIdx])
         ret1, img1 = cap.read()
         ret2, img2 = cap.read()
-        imgEncoded1 = cv2.imencode('.jpg', img1)
-        imgEncoded2 = cv2.imencode('.jpg', img2)
-        imgBytes1 = imgEncoded1[1].tobytes()
-        imgBytes2 = imgEncoded2[1].tobytes()
-        compImgByte1 = zlib.compress(imgBytes1)
-        compImgByte2 = zlib.compress(imgBytes2)
-
-        response = image_procedure_pb2.ImageResponse()
-        response.imgByte1 = compImgByte1
-        response.imgByte2 = compImgByte2
         cap.release()
+
+        response.imgByte1 = imgToByteWithZlib(img1)
+        response.imgByte2 = imgToByteWithZlib(img2)
+
         return response
 
 
